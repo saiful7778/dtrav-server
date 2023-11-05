@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const { MongoClient, ServerApiVersion } = require("mongodb");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
@@ -17,6 +18,18 @@ app.use(cookieParser());
 app.use(express.json());
 
 const port = process.env.PORT || 5001;
+const uri = process.env.CONNECT_LINK;
+
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
+
+const dtravDB = client.db("dtravDB");
+const tourPackageColl = dtravDB.collection("tourPackage");
 
 app.get("/", (req, res) => {
   res.send({
@@ -24,9 +37,18 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/tour_packages", (req, res) => {
-  console.log("Token:", req.cookies.token);
-  res.send({ tour_package: 0 });
+app.get("/tour_packages", async (req, res) => {
+  try {
+    const result = await tourPackageColl.find().toArray();
+    if (!result || result.length === 0) {
+      return res.status(404).json({ message: "No tour packages found!" });
+    }
+    res.json(result);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching tour packages" });
+  }
 });
 
 app.post("/jwt", async (req, res) => {
