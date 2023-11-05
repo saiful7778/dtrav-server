@@ -17,6 +17,20 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
+const verifyToken = async (req, res, next) => {
+  const token = req.cookies?.token;
+  if (!token) {
+    return res.status(401).send({ message: "not autorized" });
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "unautorized" });
+    }
+    req.user = decoded;
+    next();
+  });
+};
+
 const port = process.env.PORT || 5001;
 const uri = process.env.CONNECT_LINK;
 
@@ -30,6 +44,7 @@ const client = new MongoClient(uri, {
 
 const dtravDB = client.db("dtravDB");
 const tourPackageColl = dtravDB.collection("tourPackage");
+const bookingColl = dtravDB.collection("booking");
 
 app.get("/", (req, res) => {
   res.send({
@@ -48,6 +63,23 @@ app.get("/tour_packages", async (req, res) => {
     res
       .status(500)
       .json({ error: "An error occurred while fetching tour packages" });
+  }
+});
+
+app.get("/bookings", verifyToken, async (req, res) => {
+  if (req.user.email !== req.query.email) {
+    return res.status(403).send({ message: "forbidden accesss" });
+  }
+  try {
+    const result = await bookingColl.find().toArray();
+    if (!result || result.length === 0) {
+      return res.status(204).send({ message: "No tour packages found!" });
+    }
+    res.json(result);
+  } catch (err) {
+    res
+      .status(500)
+      .send({ error: "An error occurred while fetching tour packages" });
   }
 });
 
