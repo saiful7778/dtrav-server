@@ -1,6 +1,7 @@
 import express from "express";
 import serverHelper from "../utils/server-helper.js";
 import { userModel } from "../models/userModel.js";
+import jwt from "jsonwebtoken";
 
 const route = express();
 
@@ -30,6 +31,33 @@ route.post("/register", (req, res) => {
       message: "User is created",
     });
   }, res);
+});
+
+route.post("/login", (req, res) => {
+  const { email, name, userID } = req.body;
+
+  if (!name || !email || !userID) {
+    return res.status(401).send({
+      success: false,
+      message: "Invalid input data",
+    });
+  }
+
+  const token = jwt.sign(
+    {
+      email,
+      name,
+      userID,
+    },
+    // eslint-disable-next-line no-undef
+    process.env.SITE_SECRET,
+    { expiresIn: "1h" },
+  );
+
+  res.status(200).send({
+    success: true,
+    token,
+  });
 });
 
 export default route;
