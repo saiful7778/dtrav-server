@@ -74,5 +74,38 @@ route.post("/wishlist/:packageID", verifyToken, verifyTokenKey, (req, res) => {
   }, res);
 });
 
+route.delete(
+  "/wishlist/:packageID",
+  verifyToken,
+  verifyTokenKey,
+  (req, res) => {
+    const packageID = req.params.packageID;
+    serverHelper(async () => {
+      const data = await wishlistModel.findById(packageID, { _id: 1 });
+      if (!data) {
+        return res.status(404).send({
+          success: false,
+          message: "Not found",
+        });
+      }
+      const deleteData = await wishlistModel.deleteOne({ _id: packageID });
+      res.status(200).send({
+        success: true,
+        message: deleteData,
+      });
+    }, res);
+  },
+);
+
+route.get("/wishlists/:userID", verifyToken, verifyTokenKey, (req, res) => {
+  const userID = req.params.userID;
+  serverHelper(async () => {
+    const wishlist = await wishlistModel
+      .find({ user: userID }, { __v: 0, user: 0 })
+      .populate("package", ["title"]);
+    res.status(201).send({ success: true, data: wishlist });
+  }, res);
+});
+
 export default routeAll;
 export { route as singlePackage };
