@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import authentication from "./src/routes/authentication.js";
+import packages, { singlePackage } from "./src/routes/package.js";
 dotenv.config();
 
 // eslint-disable-next-line no-undef
@@ -40,6 +41,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/authentication", authentication);
+app.use("/packages", packages);
+app.use("/package", singlePackage);
 
 app.listen(port, () => {
   console.log("Server is running on port", port);
