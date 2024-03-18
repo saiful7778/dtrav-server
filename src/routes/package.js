@@ -13,8 +13,22 @@ routeAll.get("/", (req, res) => {
     const query = req.query;
     const limit = parseInt(query?.limit || 0);
     const allPackages = await packageModel
-      .find({}, { __v: 0, "images._id": 0 })
+      .find({}, { description: 0, __v: 0, images: 0 })
       .limit(limit);
+    res.status(200).send({
+      success: true,
+      data: allPackages,
+    });
+  }, res);
+});
+
+routeAll.get("/:type", (req, res) => {
+  const type = req.params.type;
+  serverHelper(async () => {
+    const allPackages = await packageModel.find(
+      { type },
+      { description: 0, __v: 0, images: 0 },
+    );
     res.status(200).send({
       success: true,
       data: allPackages,
