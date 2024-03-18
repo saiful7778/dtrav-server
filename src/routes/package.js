@@ -36,6 +36,26 @@ routeAll.get("/:type", (req, res) => {
   }, res);
 });
 
+route.get("/:packageID", (req, res) => {
+  const packageID = req.params.packageID;
+  serverHelper(async () => {
+    const data = await packageModel.findById(packageID, {
+      "images._id": 0,
+      __v: 0,
+    });
+    if (!data) {
+      return res.status(404).send({
+        success: false,
+        message: "Not found",
+      });
+    }
+    res.status(200).send({
+      success: true,
+      data,
+    });
+  }, res);
+});
+
 route.post("/wishlist/:packageID", verifyToken, verifyTokenKey, (req, res) => {
   const packageID = req.params.packageID;
   const { user_id } = req.body;

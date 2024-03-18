@@ -44,7 +44,7 @@ route.post("/login", (req, res) => {
   }
 
   serverHelper(async () => {
-    const user = await userModel.findOne({ email, userID });
+    const user = await userModel.findOne({ email, userID }, { __v: 0 });
 
     if (!user) {
       return res.status(404).send({
