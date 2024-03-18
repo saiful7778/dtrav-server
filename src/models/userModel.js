@@ -27,12 +27,6 @@ const userSchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
-    package: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "bookedPackage",
-      },
-    ],
   },
   { timestamps: true },
 );
