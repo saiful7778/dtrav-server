@@ -8,7 +8,7 @@ const route = express();
 route.post("/register", (req, res) => {
   const { name, email, userID } = req.body;
   if (!name || !email || !userID) {
-    return res.status(401).send({
+    return res.status(400).send({
       success: false,
       message: "Invalid input data",
     });
@@ -43,21 +43,32 @@ route.post("/login", (req, res) => {
     });
   }
 
-  const token = jwt.sign(
-    {
-      email,
-      name,
-      userID,
-    },
-    // eslint-disable-next-line no-undef
-    process.env.SITE_SECRET,
-    { expiresIn: "1h" },
-  );
+  serverHelper(async () => {
+    const user = await userModel.findOne({ email, userID });
 
-  res.status(200).send({
-    success: true,
-    token,
-  });
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "user not found",
+      });
+    }
+    const token = jwt.sign(
+      {
+        email: user.email,
+        name: user.fullName,
+        userID: user.userID,
+      },
+      // eslint-disable-next-line no-undef
+      process.env.SITE_SECRET,
+      { expiresIn: "1h" },
+    );
+
+    res.status(200).send({
+      success: true,
+      token,
+      user,
+    });
+  }, res);
 });
 
 export default route;
