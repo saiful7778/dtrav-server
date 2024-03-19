@@ -4,6 +4,7 @@ import { packageModel } from "../models/packageModel.js";
 import { wishlistModel } from "../models/wishlistModel.js";
 import verifyToken from "../middleware/verifyToken.js";
 import verifyTokenKey from "../middleware/verifyTokenKey.js";
+import { packageBookModel } from "../models/packageBookModel.js";
 
 const routeAll = express();
 const route = express();
@@ -104,6 +105,26 @@ route.get("/wishlists/:userID", verifyToken, verifyTokenKey, (req, res) => {
       .find({ user: userID }, { __v: 0, user: 0 })
       .populate("package", ["title"]);
     res.status(201).send({ success: true, data: wishlist });
+  }, res);
+});
+
+route.post("/booking", verifyToken, verifyTokenKey, (req, res) => {
+  const { packageID, userID, guideID, price, tourData } = req.body;
+  if (!packageID || !userID || !guideID || !price || !tourData) {
+    return res.status(400).send({
+      success: false,
+      message: "Invalid input data",
+    });
+  }
+  serverHelper(async () => {
+    const bookPackage = await packageBookModel.create({
+      package: packageID,
+      user: userID,
+      guide: guideID,
+      price,
+      tourData,
+    });
+    res.status(201).send({ success: true, message: bookPackage });
   }, res);
 });
 
