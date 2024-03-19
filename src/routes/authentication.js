@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 const route = express();
 
 route.post("/register", (req, res) => {
-  const { name, email, userID } = req.body;
+  const { name, email, userID, image } = req.body;
   if (!name || !email || !userID) {
     return res.status(400).send({
       success: false,
@@ -25,6 +25,7 @@ route.post("/register", (req, res) => {
       fullName: name,
       userID,
       email,
+      image,
     });
     res.status(201).send({
       success: true,
