@@ -27,7 +27,7 @@ const dbUrl = process.env.DB_CONNECT;
 const app = express();
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["https://dtrav-travle.web.app"],
     methods: ["GET", "POST", "DELETE", "OPTIONS", "PATCH"],
   }),
 );
