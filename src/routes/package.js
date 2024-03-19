@@ -124,7 +124,25 @@ route.post("/booking", verifyToken, verifyTokenKey, (req, res) => {
       price,
       tourData,
     });
-    res.status(201).send({ success: true, message: bookPackage });
+    const bookedCount = await packageBookModel.find({
+      user: userID,
+      status: { $ne: "rejected" },
+    });
+    res.status(201).send({
+      success: true,
+      data: { bookPackage, bookedCount: bookedCount.length },
+    });
+  }, res);
+});
+
+route.delete("/booking/:packageID", verifyToken, verifyTokenKey, (req, res) => {
+  const packageID = req.params.packageID;
+  serverHelper(async () => {
+    const data = await packageBookModel.deleteOne({ _id: packageID });
+    res.status(200).send({
+      success: true,
+      data,
+    });
   }, res);
 });
 
@@ -156,6 +174,40 @@ route.get(
       res.status(200).send({
         success: false,
         data: bookings,
+      });
+    }, res);
+  },
+);
+
+route.patch(
+  "/booking/guide/:bookedPackageID",
+  verifyToken,
+  verifyTokenKey,
+  (req, res) => {
+    const bookedPackageID = req.params.bookedPackageID;
+    const { status } = req.body;
+    if (!status) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid data",
+      });
+    }
+    serverHelper(async () => {
+      const exist = await packageBookModel.findById(bookedPackageID);
+      if (!exist) {
+        return res.status(404).send({
+          success: false,
+          message: "Booked package not found",
+        });
+      }
+      const data = await packageBookModel.updateOne(
+        { _id: bookedPackageID },
+        { status },
+        { upsert: true },
+      );
+      res.status(200).send({
+        success: true,
+        data,
       });
     }, res);
   },
