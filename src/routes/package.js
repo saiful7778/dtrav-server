@@ -142,5 +142,24 @@ route.get("/booking/:userID", verifyToken, verifyTokenKey, (req, res) => {
   }, res);
 });
 
+route.get(
+  "/booking/guide/:guideID",
+  verifyToken,
+  verifyTokenKey,
+  (req, res) => {
+    const guideID = req.params.guideID;
+    serverHelper(async () => {
+      const bookings = await packageBookModel
+        .find({ guide: guideID }, { _id: 1, tourData: 1, price: 1, status: 1 })
+        .populate("package", ["_id", "title"])
+        .populate("user", ["_id", "fullName"]);
+      res.status(200).send({
+        success: false,
+        data: bookings,
+      });
+    }, res);
+  },
+);
+
 export default routeAll;
 export { route as singlePackage };
