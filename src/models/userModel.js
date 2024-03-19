@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    image: String,
     email: {
       type: String,
       validate: {
@@ -26,6 +27,20 @@ const userSchema = new mongoose.Schema(
       },
       unique: true,
       required: true,
+    },
+    guideDetails: {
+      education: {
+        title: String,
+        details: String,
+      },
+      skills: {
+        title: String,
+        details: String,
+      },
+      experience: {
+        title: String,
+        details: String,
+      },
     },
   },
   { timestamps: true },
